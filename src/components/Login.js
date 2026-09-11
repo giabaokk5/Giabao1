@@ -9,17 +9,27 @@ function Login() {
   const navigate = useNavigate();
   const { login } = useContext(AuthContext); // Get login function from context
 
+  const adminUsername = process.env.REACT_APP_ADMIN_USERNAME || 'admin';
+  const adminPassword = process.env.REACT_APP_ADMIN_PASSWORD || 'admin123';
+
   const handleLogin = (e) => {
     e.preventDefault();
 
-    // Get the registered user information from localStorage
-    const user = JSON.parse(localStorage.getItem('user'));
+    const registeredUser = JSON.parse(localStorage.getItem('user') || 'null');
+    const isAdminLogin = username === adminUsername && password === adminPassword;
+    const user = isAdminLogin
+      ? { username: adminUsername, email: 'admin@htcdshop.local', role: 'admin' }
+      : registeredUser;
 
     // Check username and password
-    if (user && user.username === username && user.password === password) {
+    const isValidLogin = isAdminLogin || (
+      user && user.username === username && user.password === password
+    );
+
+    if (isValidLogin) {
       alert('Đăng nhập thành công!');
       login(user); // Update the context and login state
-      navigate('/'); // Redirect to home
+      navigate(user.role === 'admin' ? '/admin' : '/');
     } else {
       alert('Tên đăng nhập hoặc mật khẩu không chính xác.');
     }

@@ -5,6 +5,7 @@ export const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [username, setUsername] = useState('');
+  const [isAdmin, setIsAdmin] = useState(false);
   const [isAuthLoading, setIsAuthLoading] = useState(true);
 
   // Load initial state from localStorage
@@ -14,6 +15,7 @@ export const AuthProvider = ({ children }) => {
     if (user) {
       setIsLoggedIn(true);
       setUsername(user.username);
+      setIsAdmin(user.role === 'admin');
     }
     setIsAuthLoading(false);
   }, []);
@@ -21,6 +23,7 @@ export const AuthProvider = ({ children }) => {
   const login = (user) => {
     setIsLoggedIn(true);
     setUsername(user.username);
+    setIsAdmin(user.role === 'admin');
     localStorage.setItem('user', JSON.stringify(user));
 
     const storedLoginHistory = localStorage.getItem('loginHistory');
@@ -42,11 +45,12 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     setIsLoggedIn(false);
     setUsername('');
+    setIsAdmin(false);
     localStorage.removeItem('user');  // Remove user data
   };
 
   return (
-    <AuthContext.Provider value={{ isLoggedIn, username, isAuthLoading, login, logout }}>
+    <AuthContext.Provider value={{ isLoggedIn, username, isAdmin, isAuthLoading, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

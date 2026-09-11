@@ -37,6 +37,16 @@ function ProtectedRoute() {
   return isLoggedIn ? <Outlet /> : <Navigate to="/login" replace />;
 }
 
+function AdminRoute() {
+  const { isAdmin, isAuthLoading } = useContext(AuthContext);
+
+  if (isAuthLoading) {
+    return null;
+  }
+
+  return isAdmin ? <Outlet /> : <Navigate to="/" replace />;
+}
+
 function PublicOnlyRoute({ children }) {
   const { isLoggedIn, isAuthLoading } = useContext(AuthContext);
 
@@ -65,10 +75,12 @@ function App() {
           <Route path="/login" element={<PublicOnlyRoute><Login /></PublicOnlyRoute>} />
           <Route path="/register" element={<PublicOnlyRoute><Register /></PublicOnlyRoute>} />
           <Route element={<ProtectedRoute />}>
-            <Route path="/admin" element={<Admin />} />
-            <Route path="/admin/products" element={<ProductManagement />} />
-            <Route path="/admin/orders" element={<AdminOrders />} />
-            <Route path="/admin/users" element={<AdminUsers />} />
+            <Route element={<AdminRoute />}>
+              <Route path="/admin" element={<Admin />} />
+              <Route path="/admin/products" element={<ProductManagement />} />
+              <Route path="/admin/orders" element={<AdminOrders />} />
+              <Route path="/admin/users" element={<AdminUsers />} />
+            </Route>
             <Route element={<StoreLayout />}>
               <Route path="/" element={<Home />} />
               <Route path="/product/:id" element={<ProductDetail />} />
