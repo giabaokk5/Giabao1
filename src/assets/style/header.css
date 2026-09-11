@@ -1,0 +1,283 @@
+/* General Reset */
+body, h1, p, a {
+  margin: 0;
+  padding: 0;
+  text-decoration: none;
+  color: inherit;
+  font-family: 'Arial', sans-serif;
+}
+
+/* Header Styling */
+.header {
+  background-color: #f8f9fa;
+  padding: 1rem 2rem;
+  border-bottom: 1px solid #ddd;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.header-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Logo Styling */
+.logo-image {
+  width: 200px;
+  height: auto;
+}
+
+/* Search Bar Styling */
+.search-bar {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.search-bar input {
+  width: 100%;
+  padding: 0.75rem 2.5rem 0.75rem 1rem;
+  border: 1px solid #ddd;
+  border-radius: 25px;
+  font-size: 1rem;
+  outline: none;
+  transition: all 0.3s ease;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.search-bar input:focus {
+  border-color: #007bff;
+  box-shadow: 0px 4px 8px rgba(0, 123, 255, 0.2);
+}
+
+.search-bar .icon {
+  position: absolute;
+  top: 50%;
+  right: 1rem;
+  transform: translateY(-50%);
+  font-size: 1.2rem;
+  color: #aaa;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.search-bar input:focus + .icon,
+.search-bar .icon:hover {
+  color: #007bff;
+}
+
+/* Navigation Styling */
+.nav {
+  display: flex;
+  gap: 1rem;
+}
+
+.nav-link {
+  font-size: 1rem;
+  color: #007bff;
+  padding: 0.5rem 1rem;
+  border-radius: 5px;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.nav-link:hover {
+  background-color: #e7f1ff;
+  color: #0056b3;
+}
+
+/* Dropdown Menu */
+.dropdown {
+  position: relative;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background-color: #ffffff;
+  border: 1px solid #ddd;
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.15);
+  border-radius: 5px;
+  padding: 0.5rem;
+  display: none;
+  flex-direction: column;
+  gap: 0.5rem;
+  z-index: 1000;
+}
+
+.dropdown:hover .dropdown-menu {
+  display: flex;
+}
+
+.dropdown-menu .btn {
+  text-align: left;
+  color: #007bff;
+  background: none;
+  border: none;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.dropdown-menu .btn:hover {
+  background-color: #f1f1f1;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .header-container {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .nav {
+    margin-top: 1rem;
+  }
+}
+
+/* Compact fashion storefront header */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  padding: 16px 28px;
+  border-bottom: 1px solid #e7e3dc;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 8px 24px rgba(31, 24, 17, 0.06);
+  backdrop-filter: blur(14px);
+}
+
+.header-container {
+  width: min(1180px, 100%);
+  margin: 0 auto;
+  gap: 28px;
+}
+
+.logo {
+  margin: 0;
+  flex: 0 0 auto;
+}
+
+.logo-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo-mark {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  border-radius: 50%;
+  background: #171717;
+  color: #fff;
+  font-family: Georgia, serif;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.logo-copy {
+  display: flex;
+  flex-direction: column;
+  line-height: 1;
+}
+
+.logo-name {
+  color: #171717;
+  font-family: Georgia, serif;
+  font-size: 1.2rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.logo-tagline {
+  margin-top: 4px;
+  color: #e64a2e;
+  font-size: 0.48rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+
+.header .search-bar {
+  flex: 1 1 360px;
+  max-width: 520px;
+  margin: 0;
+}
+
+.header .search-bar input {
+  border: 1px solid #e7e3dc;
+  border-radius: 4px;
+  background: #f6f4f0;
+  box-shadow: none;
+}
+
+.header .search-bar input:focus {
+  border-color: #171717;
+  box-shadow: 0 0 0 3px rgba(230, 74, 46, 0.12);
+}
+
+.header .search-bar .icon {
+  color: #171717;
+}
+
+.nav {
+  align-items: center;
+  gap: 4px;
+}
+
+.nav-link,
+.header .btn {
+  color: #171717;
+  font-size: 0.86rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.nav-link:hover,
+.header .btn:hover {
+  background: #f6f4f0;
+  color: #e64a2e;
+}
+
+.nav-link .icon {
+  margin-right: 5px;
+  color: #e64a2e;
+}
+
+.dropdown-menu {
+  border: 1px solid #e7e3dc;
+  border-radius: 4px;
+  box-shadow: 0 14px 30px rgba(31, 24, 17, 0.12);
+}
+
+@media (max-width: 768px) {
+  .header {
+    position: relative;
+    padding: 14px 16px;
+  }
+
+  .header-container {
+    gap: 14px;
+  }
+
+  .header .search-bar {
+    order: 3;
+    flex-basis: 100%;
+  }
+
+  .nav {
+    gap: 0;
+  }
+
+  .nav-link {
+    padding: 8px;
+    font-size: 0;
+  }
+
+  .nav-link .icon {
+    margin: 0;
+    font-size: 1.15rem;
+  }
+}

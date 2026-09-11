@@ -1,0 +1,30 @@
+import React from 'react';
+import { Link } from 'react-router-dom';
+import products from './products';
+
+function CategoryPage({ categoryName }) {
+    const filteredProducts = products.filter((product) => product.category === categoryName);
+
+    return (
+        <div className="category-page">
+            <h1>{categoryName}</h1>
+            <div className="product-list">
+                {filteredProducts.length > 0 ? (
+                    filteredProducts.map((product) => (
+                        <div key={product.id} className="product-card">
+                            <Link to={`/product/${product.id}`}>
+                                <img src={product.image} alt={product.name} />
+                                <h3>{product.name}</h3>
+                                <p>Giá: ${product.price}</p>
+                            </Link>
+                        </div>
+                    ))
+                ) : (
+                    <p>Không có sản phẩm nào trong danh mục này.</p>
+                )}
+            </div>
+        </div>
+    );
+}
+
+export default CategoryPage;

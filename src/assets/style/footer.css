@@ -1,0 +1,39 @@
+/* Footer.css */
+.footer-container {
+  background-color: #1a1a1a;
+  color: white;
+  padding: 2rem 0;
+}
+
+.footer-container h5 {
+  font-size: 1.25rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+}
+
+.footer-container a {
+  color: #ffffff;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.footer-container a:hover {
+  color: #0d6efd;
+}
+
+.footer-container .social-icons .fab {
+  font-size: 1.5rem;
+  margin-right: 0.5rem;
+  transition: transform 0.3s ease;
+}
+
+.footer-container .social-icons .fab:hover {
+  transform: scale(1.2);
+}
+
+.footer-container .footer-bottom {
+  background-color: rgba(0, 0, 0, 0.2);
+  padding: 1rem 0;
+  font-size: 0.9rem;
+}
