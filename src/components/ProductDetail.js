@@ -120,12 +120,14 @@ function ProductDetail() {
           <p className="product-price">Giá: ${product.price}</p>
           <p className="product-category">Loại: {product.category}</p>
           <p className="product-description">{product.description}</p>
-          <button className="add-to-cart-button" onClick={handleAddToCart}>
-            Thêm vào giỏ hàng
-          </button>
-          <button className="checkout-button" onClick={handleCheckout}>
-            Thanh toán
-          </button>
+          <div className="button-container">
+            <button className="add-to-cart-button" onClick={handleAddToCart}>
+              Thêm vào giỏ hàng
+            </button>
+            <button className="checkout-button" onClick={handleCheckout}>
+              Thanh toán
+            </button>
+          </div>
           {message && <div className="success-message">{message}</div>}
         </div>
       </div>
