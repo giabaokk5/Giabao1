@@ -6,7 +6,7 @@ import '../assets/style/header.css';
 import { AuthContext } from '../contexts/AuthContext';
 
 function Header() {
-  const { isLoggedIn, username, logout } = useContext(AuthContext);
+  const { isLoggedIn, username, isAdmin, logout } = useContext(AuthContext);
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
   const toggleDropdown = () => {
@@ -29,12 +29,17 @@ function Header() {
 
         {/* Navigation and User Actions */}
         <nav className="nav">
-        <Link to="/ticket" className="nav-link">
+          <Link to="/ticket" className="nav-link">
             <FontAwesomeIcon icon={faTags} className="icon" /> Hỗ trợ
           </Link>
           <Link to="/cart" className="nav-link">
             <FontAwesomeIcon icon={faShoppingCart} className="icon" /> Giỏ hàng
           </Link>
+          {isLoggedIn && isAdmin && (
+            <Link to="/admin" className="nav-link">
+              <FontAwesomeIcon icon={faUser} className="icon" /> Quay lại Admin
+            </Link>
+          )}
           {isLoggedIn ? (
             <div className="dropdown">
               <button className="btn" onClick={toggleDropdown}>
