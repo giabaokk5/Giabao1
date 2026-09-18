@@ -110,7 +110,7 @@ function Register() {
               />
             </div>
             <div className="input-group">
-              <label htmlFor="register-confirm-password">Xác nhận mật khẩu</label>
+              <label htmlFor="register-confirm-password">Xác nhận lại mật khẩu</label>
               <input
                 id="register-confirm-password"
                 type="password"
