@@ -1,18 +1,41 @@
-FROM node:20-alpine AS build
-
+# Stage 1: Build React Frontend
+FROM node:20-alpine AS build-client
 WORKDIR /app
 
+# Install frontend dependencies
 COPY package*.json ./
 RUN npm ci
 
+# Copy frontend source and build
 COPY . .
 RUN npm run build
 
-FROM nginx:1.27-alpine
+# Stage 2: Production Runtime with Express Backend
+FROM node:20-alpine AS runtime
+WORKDIR /app
 
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-COPY --from=build /app/build /usr/share/nginx/html
+ENV NODE_ENV=production
+ENV PORT=5000
 
-EXPOSE 80
+# Install backend dependencies (production only)
+COPY server/package*.json ./server/
+RUN cd server && npm ci --omit=dev
 
-CMD ["nginx", "-g", "daemon off;"]
+# Copy backend application
+COPY server/ ./server/
+
+# Copy built React frontend from Stage 1
+COPY --from=build-client /app/build ./build
+
+# Expose container port
+EXPOSE 5000
+
+# Persistent storage volume for database and uploads
+VOLUME ["/app/server/data"]
+
+# Container healthcheck
+HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider http://localhost:5000/api/health || exit 1
+
+# Start the fullstack application
+CMD ["node", "server/index.js"]

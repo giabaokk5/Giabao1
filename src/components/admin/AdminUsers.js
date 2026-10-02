@@ -1,15 +1,42 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import '../../assets/style/admin.css';
+import api from '../../services/api';
 
 function AdminUsers() {
-  const storedHistory = JSON.parse(localStorage.getItem('loginHistory') || '[]');
-  const currentUser = JSON.parse(localStorage.getItem('user') || 'null');
-  const users = storedHistory.length > 0
-    ? storedHistory
-    : currentUser
-      ? [{ ...currentUser, lastLogin: new Date().toISOString() }]
-      : [];
+  const [users, setUsers] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const data = await api.admin.getUsers();
+        if (data && (data.users || data.loginHistory)) {
+          const combined = data.loginHistory && data.loginHistory.length > 0
+            ? data.loginHistory
+            : data.users || [];
+          setUsers(combined);
+          setIsLoading(false);
+          return;
+        }
+      } catch (err) {
+        console.warn('Could not fetch users from API, falling back to local storage:', err.message);
+      }
+
+      // Fallback
+      const storedHistory = JSON.parse(localStorage.getItem('loginHistory') || '[]');
+      const currentUser = JSON.parse(localStorage.getItem('user') || 'null');
+      const fallbackList = storedHistory.length > 0
+        ? storedHistory
+        : currentUser
+          ? [{ ...currentUser, lastLogin: new Date().toISOString() }]
+          : [];
+      setUsers(fallbackList);
+      setIsLoading(false);
+    };
+
+    fetchUsers();
+  }, []);
 
   return (
     <main className="admin-shell">
@@ -34,13 +61,21 @@ function AdminUsers() {
             <h1>Người dùng đã đăng nhập</h1>
             <p>Theo dõi những tài khoản đã truy cập vào HTCD Shop.</p>
           </div>
-          <span className="admin-status"><i /> {users.length} tài khoản</span>
+          <span className="admin-status">
+            <i /> {isLoading ? 'Đang tải...' : `${users.length} tài khoản`}
+          </span>
         </header>
 
         <div className="admin-table-wrap">
           <table className="admin-table">
             <thead>
-              <tr><th>Tài khoản</th><th>Email</th><th>Số điện thoại</th><th>Ngày sinh</th><th>Lần đăng nhập gần nhất</th></tr>
+              <tr>
+                <th>Tài khoản</th>
+                <th>Email</th>
+                <th>Số điện thoại</th>
+                <th>Ngày sinh</th>
+                <th>Lần đăng nhập gần nhất</th>
+              </tr>
             </thead>
             <tbody>
               {users.length > 0 ? users.map((user) => (
@@ -52,7 +87,9 @@ function AdminUsers() {
                   <td>{user.lastLogin ? new Date(user.lastLogin).toLocaleString('vi-VN') : 'Chưa có dữ liệu'}</td>
                 </tr>
               )) : (
-                <tr><td colSpan="5">Chưa có tài khoản nào đăng nhập.</td></tr>
+                <tr>
+                  <td colSpan="5">{isLoading ? 'Đang tải dữ liệu...' : 'Chưa có tài khoản nào đăng nhập.'}</td>
+                </tr>
               )}
             </tbody>
           </table>

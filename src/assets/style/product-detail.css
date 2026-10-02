@@ -39,18 +39,8 @@
 }
 
 .product-info {
-  display: flex;
   flex: 1;
-  flex-direction: column;
   padding: 20px 30px;
-}
-
-.button-container {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  width: 100%;
-  margin-top: 20px;
 }
 
 .product-name {
@@ -83,20 +73,14 @@
 
 .add-to-cart-button,
 .checkout-button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  min-height: 48px;
+  width: 100%; /* Make buttons full width for better appearance */
   background-color: #007bff;
   color: #fff;
-  padding: 10px 16px;
+  padding: 8px 16px; /* Giảm padding để nút nhỏ lại */
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  font-size: 14px;
-  font-weight: 600;
-  white-space: nowrap;
+  font-size: 14px; /* Giảm kích thước font */
   transition: background-color 0.3s ease;
 }
 

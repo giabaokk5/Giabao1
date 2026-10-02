@@ -1,20 +1,23 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import '../assets/style/auth.css';
+import api from '../services/api';
 
 function Register() {
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const navigate = useNavigate();
   const [phone, setPhone] = useState('');
   const [dateOfBirth, setDateOfBirth] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const navigate = useNavigate();
 
-  const handleRegister = (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
+    setErrorMessage('');
 
-    // Kiểm tra xem mật khẩu và xác nhận mật khẩu có trùng khớp không
     if (password !== confirmPassword) {
       alert('Mật khẩu và xác nhận mật khẩu không trùng khớp.');
       return;
@@ -30,12 +33,38 @@ function Register() {
       return;
     }
 
-    // Lưu thông tin người dùng vào localStorage (hoặc vào cơ sở dữ liệu)
-    const newUser = { email, username, password, phone, dateOfBirth };
-    localStorage.setItem('user', JSON.stringify(newUser));
+    setIsLoading(true);
 
-    alert('Đăng ký thành công!');
-    navigate('/login'); // Điều hướng đến trang đăng nhập
+    try {
+      // 1. Register with backend API
+      const res = await api.auth.register({
+        email,
+        username,
+        password,
+        phone,
+        dateOfBirth
+      });
+
+      setIsLoading(false);
+      alert(res.message || 'Đăng ký thành công!');
+      navigate('/login');
+    } catch (apiError) {
+      // 2. Fallback to localStorage registration if backend is unreachable
+      if (apiError.message && !apiError.message.includes('kết nối') && !apiError.message.includes('Failed to fetch')) {
+        // Validation error from server (e.g., username exists)
+        setIsLoading(false);
+        setErrorMessage(apiError.message);
+        alert(apiError.message);
+        return;
+      }
+
+      console.warn('Backend unavailable, saving locally as fallback:', apiError.message);
+      const newUser = { email, username, password, phone, dateOfBirth };
+      localStorage.setItem('user', JSON.stringify(newUser));
+      setIsLoading(false);
+      alert('Đăng ký thành công!');
+      navigate('/login');
+    }
   };
 
   return (
@@ -52,6 +81,13 @@ function Register() {
             <h2>Tạo tài khoản</h2>
             <p>Điền thông tin để bắt đầu mua sắm.</p>
           </div>
+
+          {errorMessage && (
+            <div className="alert alert-danger py-2" role="alert">
+              {errorMessage}
+            </div>
+          )}
+
           <form onSubmit={handleRegister}>
             <div className="input-group">
               <label htmlFor="register-email">Email</label>
@@ -61,6 +97,7 @@ function Register() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                disabled={isLoading}
               />
             </div>
             <div className="input-group">
@@ -71,6 +108,7 @@ function Register() {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 required
+                disabled={isLoading}
               />
             </div>
             <div className="auth-form-row">
@@ -85,6 +123,7 @@ function Register() {
                   onChange={(e) => setPhone(e.target.value)}
                   placeholder="09xxxxxxxx"
                   required
+                  disabled={isLoading}
                 />
               </div>
               <div className="input-group">
@@ -96,6 +135,7 @@ function Register() {
                   value={dateOfBirth}
                   onChange={(e) => setDateOfBirth(e.target.value)}
                   required
+                  disabled={isLoading}
                 />
               </div>
             </div>
@@ -107,6 +147,7 @@ function Register() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                disabled={isLoading}
               />
             </div>
             <div className="input-group">
@@ -117,10 +158,11 @@ function Register() {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
+                disabled={isLoading}
               />
             </div>
-            <button type="submit" className="register-button">
-              Đăng ký
+            <button type="submit" className="register-button" disabled={isLoading}>
+              {isLoading ? 'Đang đăng ký...' : 'Đăng ký'}
             </button>
           </form>
           <div className="login-link">

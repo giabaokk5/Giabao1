@@ -1,19 +1,52 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import './assets/style/admin.css';
+import api from './services/api';
 
 function Admin() {
+  const [stats, setStats] = useState({
+    totalProducts: 45,
+    totalOrders: 0,
+    totalUsers: 1,
+    totalRevenue: 0,
+    ordersToday: 0
+  });
+
   useEffect(() => {
     document.title = 'HTCD Shop - Quản trị';
+
+    const fetchStats = async () => {
+      try {
+        const data = await api.admin.getStats();
+        if (data) {
+          setStats(data);
+          return;
+        }
+      } catch (err) {
+        console.warn('Could not load stats from API, calculating locally:', err.message);
+      }
+
+      // Local fallback calculation
+      const localOrders = JSON.parse(localStorage.getItem('orders') || '[]');
+      const localUsers = JSON.parse(localStorage.getItem('loginHistory') || '[]');
+      const totalRev = localOrders.reduce((sum, o) => sum + (Number(o.total) || 0), 0);
+      setStats({
+        totalProducts: 45,
+        totalOrders: localOrders.length,
+        totalUsers: Math.max(1, localUsers.length),
+        totalRevenue: totalRev,
+        ordersToday: localOrders.length
+      });
+    };
+
+    fetchStats();
   }, []);
 
   return (
     <>
       <main className="admin-shell">
         {/* Sidebar */}
-        <aside
-          className="admin-sidebar"
-        >
+        <aside className="admin-sidebar">
           <div className="admin-brand">
             <span className="admin-brand-mark">HT</span>
             <span>
@@ -43,7 +76,7 @@ function Admin() {
           <header className="admin-page-header">
             <div>
               <span className="admin-eyebrow">TRUNG TÂM QUẢN TRỊ</span>
-              <h1>Xin chào, quản trị viên</h1>
+              <h1>Xin chào, Quản trị viên</h1>
               <p>Theo dõi và vận hành HTCD Shop từ một nơi.</p>
             </div>
             <span className="admin-status"><i /> Hệ thống đang hoạt động</span>
@@ -52,18 +85,18 @@ function Admin() {
           <div className="admin-stat-grid">
             <div className="admin-stat-card">
               <span className="admin-stat-label">SẢN PHẨM</span>
-              <strong>136</strong>
+              <strong>{stats.totalProducts}</strong>
               <small>Trong danh mục hiện tại</small>
             </div>
             <div className="admin-stat-card accent">
               <span className="admin-stat-label">ĐƠN HÀNG HÔM NAY</span>
-              <strong>24</strong>
-              <small><b>+12%</b> so với hôm qua</small>
+              <strong>{stats.ordersToday}</strong>
+              <small>Tổng {stats.totalOrders} đơn hàng</small>
             </div>
             <div className="admin-stat-card">
               <span className="admin-stat-label">DOANH THU</span>
-              <strong>$8,420</strong>
-              <small><b className="positive">+8.4%</b> trong tuần này</small>
+              <strong>${stats.totalRevenue.toLocaleString()}</strong>
+              <small><b className="positive">{stats.totalUsers}</b> tài khoản khách</small>
             </div>
           </div>
 

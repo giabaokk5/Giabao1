@@ -4,48 +4,29 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import '../assets/style/checkout.css';
 // Assuming you have a context to manage authentication state
 import { AuthContext } from '../contexts/AuthContext'; // Example import, adjust to your context structure
+import api from '../services/api';
 
 function Checkout() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { isLoggedIn } = useContext(AuthContext);
+  const { isLoggedIn } = useContext(AuthContext); // Just destructure isLoggedIn, not user
   const product = location.state?.product;
-  const cartItemsFromState = location.state?.cartItems || [];
 
-  const [items, setItems] = useState(
-    cartItemsFromState.length > 0
-      ? cartItemsFromState
-      : product
-        ? [{ ...product, quantity: 1 }]
-        : []
-  );
-
+  // State for delivery information
   const [address, setAddress] = useState('');
   const [phone, setPhone] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('cod');
 
-  const updateCheckoutQuantity = (id, nextQuantity) => {
-    setItems((prevItems) =>
-      prevItems.map((item) =>
-        item.id === id
-          ? { ...item, quantity: Math.max(1, Number(nextQuantity) || 1) }
-          : item
-      )
-    );
-  };
-
-  const subtotal = items.reduce((total, item) => total + Number(item.price) * Number(item.quantity || 1), 0);
-
-  if (!product && items.length === 0) {
+  if (!product) {
     return <h2>Không có sản phẩm để thanh toán</h2>;
   }
 
-  const handleConfirmPayment = () => {
+  const handleConfirmPayment = async () => {
     if (!isLoggedIn) {
       navigate('/login');
       return;
     }
-
+  
     if (!address || !phone) {
       alert('Vui lòng nhập đầy đủ địa chỉ và số điện thoại.');
       return;
@@ -61,18 +42,19 @@ function Checkout() {
       bank: 'Chuyển khoản ngân hàng',
       wallet: 'Ví điện tử',
     };
-
+  
     const newOrder = {
-      id: Math.floor(Math.random() * 1000),
+      id: Math.floor(Math.random() * 1000), // Generate a random order ID
       customer: JSON.parse(localStorage.getItem('user') || 'null')?.username || 'Khách hàng',
       date: new Date().toLocaleDateString(),
-      total: subtotal,
-      items: items.map((item) => ({
-        id: item.id,
-        name: item.name,
-        quantity: item.quantity,
-        price: item.price,
-      })),
+      total: product.price,
+      items: [
+        {
+          id: product.id,
+          name: product.name,
+          quantity: 1,
+        },
+      ],
       delivery: {
         address,
         phone,
@@ -83,21 +65,29 @@ function Checkout() {
     const storedOrders = JSON.parse(localStorage.getItem('orders') || '[]');
     localStorage.setItem('orders', JSON.stringify([newOrder, ...storedOrders]));
 
+    // Send order to backend API
+    try {
+      await api.orders.create(newOrder);
+    } catch (apiErr) {
+      console.warn('Backend order save failed, stored locally:', apiErr.message);
+    }
+  
+    // Prepare order message for Telegram
     const orderMessage = `
       🛒 Đơn hàng mới!
       - Mã đơn hàng: ${newOrder.id}
       - Ngày: ${newOrder.date}
-      - Sản phẩm: ${items.map((item) => `${item.name} x ${item.quantity}`).join(', ')}
-      - Tổng tiền: $${subtotal}
+      - Sản phẩm: ${product.name}
+      - Giá: $${product.price}
       - Địa chỉ giao hàng: ${address}
       - Số điện thoại: ${phone}
       - Phương thức thanh toán: ${paymentMethodLabels[paymentMethod]}
     `;
-
+  
     const sendToTelegram = async () => {
       const botToken = '8157137572:AAGahMNa3729RVAsDVlW1J0njPF1rFyXRCE';
       const chatId = '2075745493';
-
+  
       try {
         const response = await axios.post(
           `https://api.telegram.org/bot${botToken}/sendMessage`,
@@ -106,7 +96,7 @@ function Checkout() {
             text: orderMessage,
           }
         );
-
+  
         if (response.status === 200) {
           console.log('Message sent to Telegram successfully');
         } else {
@@ -116,50 +106,26 @@ function Checkout() {
         console.error('Error sending Telegram message:', error.message);
       }
     };
-
+  
+    // Call the function to send the message
     sendToTelegram();
-
+  
+    // Redirect to History with updated order data
     navigate('/history', {
       state: {
-        orderHistory: [newOrder],
+        orderHistory: [newOrder], // Replace this with the actual updated order list
       },
     });
-
+  
     alert('Cảm ơn bạn đã mua hàng!');
   };
-
   return (
     <div className="checkout-container">
       <h1>Thanh toán</h1>
-
-      <div className="checkout-products-list">
-        {items.map((item) => (
-          <div key={item.id} className="checkout-product">
-            <img src={item.image} alt={item.name} />
-            <div className="checkout-product-info">
-              <h2>{item.name}</h2>
-              <p>Giá: ${item.price}</p>
-              <div className="checkout-quantity-row">
-                <button type="button" onClick={() => updateCheckoutQuantity(item.id, Number(item.quantity || 1) - 1)}>-</button>
-                <span>{item.quantity || 1}</span>
-                <button type="button" onClick={() => updateCheckoutQuantity(item.id, Number(item.quantity || 1) + 1)}>+</button>
-              </div>
-              <strong>Tổng: ${Number(item.price) * Number(item.quantity || 1)}</strong>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      <div className="checkout-summary-box">
-        <h3>Sản phẩm đã đặt</h3>
-        <ul>
-          {items.map((item) => (
-            <li key={item.id}>
-              {item.name} x {item.quantity || 1} - ${Number(item.price) * Number(item.quantity || 1)}
-            </li>
-          ))}
-        </ul>
-        <p className="checkout-total">Tổng tiền: ${subtotal}</p>
+      <div className="checkout-product">
+        <img src={product.image} alt={product.name} />
+        <h2>{product.name}</h2>
+        <p>Giá: ${product.price}</p>
       </div>
 
       {isLoggedIn && (

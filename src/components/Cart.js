@@ -5,6 +5,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import '../assets/style/cart.css';
 import { useCart } from '../contexts/CartContext';
+import api from '../services/api';
 
 function Cart() {
   const { cartItems, removeFromCart, updateQuantity, totalPrice, clearCart } = useCart();
@@ -31,24 +32,52 @@ function Cart() {
     }
   };
 
-  const handlePlaceOrder = () => {
+  const handlePlaceOrder = async () => {
     if (cartItems.length === 0) {
       alert('Giỏ hàng trống, không thể đặt hàng!');
       return;
     }
 
-    navigate('/checkout', {
-      state: {
-        cartItems,
-        totalPrice: totalPrice,
-        discountAmount,
-        discountedTotal: Math.max(totalPrice - discountAmount, 0),
-        source: 'cart',
-      },
-    });
+    const newOrder = {
+      id: new Date().toISOString(),
+      customer: JSON.parse(localStorage.getItem('user') || 'null')?.username || 'Khách hàng',
+      items: cartItems,
+      total: totalPrice - discountAmount,
+      date: new Date().toLocaleString(),
+    };
+
+    setOrderHistory([...orderHistory, newOrder]);
+    const storedOrders = JSON.parse(localStorage.getItem('orders') || '[]');
+    localStorage.setItem('orders', JSON.stringify([newOrder, ...storedOrders]));
+
+    // Send order to backend API
+    try {
+      await api.orders.create(newOrder);
+    } catch (apiErr) {
+      console.warn('Backend order save failed, stored locally:', apiErr.message);
+    }
+
+    clearCart();
+
+    // Gửi thông báo đến bot Telegram
+    const message = `🛒Đơn hàng mới:\nID: ${newOrder.id}\nNgày: ${newOrder.date}\nTổng tiền: $${newOrder.total}\nChi tiết:\n` + 
+                    cartItems.map(item => `${item.name} - Số lượng: ${item.quantity} - Giá: $${item.price}`).join('\n');
+
+    const telegramToken = '8157137572:AAGahMNa3729RVAsDVlW1J0njPF1rFyXRCE'; // Thay thế bằng token của bạn
+    const chatId = '2075745493'; // Thay thế bằng chat_id của bạn
+
+    try {
+      await axios.post(`https://api.telegram.org/bot${telegramToken}/sendMessage`, {
+        chat_id: chatId,
+        text: message,
+      });
+      navigate('/history', { state: { orderHistory: [...orderHistory, newOrder] } });
+    } catch (error) {
+      console.error('Lỗi khi gửi đơn hàng đến Telegram:', error);
+    }
   };
 
-  const discountedTotal = Math.max(totalPrice - discountAmount, 0);
+  const discountedTotal = totalPrice - discountAmount;
 
   return (
     <main className="cart-page">

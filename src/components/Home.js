@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import products from './products'; // Import danh sách sản phẩm
+import staticProducts from './products'; // Import danh sách sản phẩm
+import api from '../services/api';
 const banners = [
     { id: 1, image: 'https://i.imgur.com/lvjwNR2.png' },
     { id: 2, image: 'https://i.imgur.com/WgIBDhE.png' },
@@ -14,12 +15,28 @@ const categories = [
 ];
 
 function Home() {
+    const [productsList, setProductsList] = useState(staticProducts);
     const [searchQuery, setSearchQuery] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const productsPerPage = 15;
 
+    useEffect(() => {
+        const fetchProducts = async () => {
+            try {
+                const data = await api.products.getAll();
+                if (Array.isArray(data) && data.length > 0) {
+                    setProductsList(data);
+                }
+            } catch (err) {
+                console.warn('API error fetching home products, using static fallback:', err.message);
+            }
+        };
+
+        fetchProducts();
+    }, []);
+
     // Lọc sản phẩm theo từ khóa tìm kiếm
-    const filteredProducts = products.filter((product) =>
+    const filteredProducts = productsList.filter((product) =>
         product.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
 

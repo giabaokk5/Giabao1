@@ -1,8 +1,9 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import '../assets/style/product-detail.css';
 import { useCart } from '../contexts/CartContext';
 import { AuthContext } from '../contexts/AuthContext';
+import api from '../services/api';
 
 const products = [
   // Danh sách sản phẩm như bạn đã cung cấp
@@ -62,6 +63,27 @@ function ProductDetail() {
   const navigate = useNavigate(); // Sử dụng navigate
   const { username } = useContext(AuthContext);
   const product = products.find((p) => p.id === parseInt(id));
+  const [reviews, setReviews] = useState([]);
+
+  useEffect(() => {
+    if (!product) return;
+    const fetchReviews = async () => {
+      try {
+        const data = await api.reviews.getByProduct(product.id);
+        if (Array.isArray(data)) {
+          setReviews(data);
+          return;
+        }
+      } catch (err) {
+        console.warn('Could not load reviews from API, using local storage:', err.message);
+      }
+
+      const storedReviews = JSON.parse(localStorage.getItem('productReviews') || '{}');
+      setReviews(storedReviews[product.id] || []);
+    };
+
+    fetchReviews();
+  }, [product]);
 
   if (!product) return <h2>Không tìm thấy sản phẩm</h2>;
 
@@ -79,13 +101,11 @@ function ProductDetail() {
     navigate('/checkout', { state: { product } }); // Điều hướng đến trang thanh toán
   };
 
-  const storedReviews = JSON.parse(localStorage.getItem('productReviews') || '{}');
-  const reviews = storedReviews[product.id] || [];
   const averageRating = reviews.length > 0
     ? reviews.reduce((total, review) => total + review.rating, 0) / reviews.length
     : 0;
 
-  const handleSubmitReview = (event) => {
+  const handleSubmitReview = async (event) => {
     event.preventDefault();
     const text = reviewText.trim();
 
@@ -100,11 +120,31 @@ function ProductDetail() {
       text,
       date: new Date().toLocaleDateString('vi-VN'),
     };
-    const nextReviews = [nextReview, ...reviews];
+
+    try {
+      const res = await api.reviews.add(product.id, {
+        username: nextReview.username,
+        rating: nextReview.rating,
+        text: nextReview.text
+      });
+      if (res.review) {
+        setReviews((prev) => [res.review, ...prev]);
+      } else {
+        setReviews((prev) => [nextReview, ...prev]);
+      }
+    } catch (err) {
+      console.warn('API review failed, saving locally:', err.message);
+      setReviews((prev) => [nextReview, ...prev]);
+    }
+
+    // Also persist locally
+    const storedReviews = JSON.parse(localStorage.getItem('productReviews') || '{}');
+    const localReviews = [nextReview, ...(storedReviews[product.id] || [])];
     localStorage.setItem('productReviews', JSON.stringify({
       ...storedReviews,
-      [product.id]: nextReviews,
+      [product.id]: localReviews,
     }));
+
     setReviewText('');
     setReviewRating(5);
   };
@@ -120,14 +160,12 @@ function ProductDetail() {
           <p className="product-price">Giá: ${product.price}</p>
           <p className="product-category">Loại: {product.category}</p>
           <p className="product-description">{product.description}</p>
-          <div className="button-container">
-            <button className="add-to-cart-button" onClick={handleAddToCart}>
-              Thêm vào giỏ hàng
-            </button>
-            <button className="checkout-button" onClick={handleCheckout}>
-              Thanh toán
-            </button>
-          </div>
+          <button className="add-to-cart-button" onClick={handleAddToCart}>
+            Thêm vào giỏ hàng
+          </button>
+          <button className="checkout-button" onClick={handleCheckout}>
+            Thanh toán
+          </button>
           {message && <div className="success-message">{message}</div>}
         </div>
       </div>
