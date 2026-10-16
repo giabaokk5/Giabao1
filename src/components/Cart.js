@@ -123,7 +123,7 @@ function Cart() {
                         <FontAwesomeIcon icon={faPlus} />
                       </button>
                     </div>
-                    <strong className="item-total">${item.price * item.quantity}</strong>
+                    <strong className="item-total">${(Number(item.price) || 0) * (Number(item.quantity) || 1)}</strong>
                   </div>
                 </div>
               </li>

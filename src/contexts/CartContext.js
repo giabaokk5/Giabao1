@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 
 // Create a Cart Context
 const CartContext = createContext();
@@ -8,24 +8,41 @@ export function useCart() {
 }
 
 export const CartProvider = ({ children }) => {
-  const [cartItems, setCartItems] = useState([]);
+  const [cartItems, setCartItems] = useState(() => {
+    try {
+      const saved = localStorage.getItem('cartItems');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('cartItems', JSON.stringify(cartItems));
+    } catch (e) {
+      console.warn('Failed to save cart to localStorage:', e);
+    }
+  }, [cartItems]);
   
   // Add item to cart
   const addToCart = (item) => {
     setCartItems((prevItems) => {
-      const existingItem = prevItems.find((i) => i.id === item.id);
+      const existingItem = prevItems.find((i) => String(i.id) === String(item.id));
       if (existingItem) {
         return prevItems.map((i) =>
-          i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i
+          String(i.id) === String(item.id)
+            ? { ...i, quantity: (Number(i.quantity) || 1) + 1 }
+            : i
         );
       }
-      return [...prevItems, { ...item, quantity: 1 }];
+      return [...prevItems, { ...item, price: Number(item.price) || 0, quantity: 1 }];
     });
   };
 
   // Remove item from cart
   const removeFromCart = (id) => {
-    setCartItems((prevItems) => prevItems.filter((item) => item.id !== id));
+    setCartItems((prevItems) => prevItems.filter((item) => String(item.id) !== String(id)));
   };
 
   // Clear all items from cart
@@ -33,16 +50,17 @@ export const CartProvider = ({ children }) => {
 
   // Update item quantity in the cart
   const updateQuantity = (id, newQuantity) => {
+    const safeQuantity = Math.max(1, Number(newQuantity) || 1);
     setCartItems((prevItems) =>
       prevItems.map((item) =>
-        item.id === id ? { ...item, quantity: newQuantity } : item
+        String(item.id) === String(id) ? { ...item, quantity: safeQuantity } : item
       )
     );
   };
 
   // Calculate total price
   const totalPrice = cartItems.reduce(
-    (total, item) => total + item.price * item.quantity,
+    (total, item) => total + (Number(item.price) || 0) * (Number(item.quantity) || 1),
     0
   );
 
