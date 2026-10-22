@@ -36,8 +36,8 @@ pipeline {
                 withCredentials([usernamePassword(credentialsId: 'dockerhub-cred',
                     usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
                     
-                    sh "echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin"
-                    sh "docker push docker.io/$DOCKER_USER/$IMAGE_NAME:latest"
+                    sh 'echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin'
+                    sh 'docker push docker.io/$DOCKER_USER/$IMAGE_NAME:latest'
                 }
             }
         }
@@ -48,30 +48,29 @@ pipeline {
                     usernamePassword(credentialsId: 'dockerhub-cred',
                         usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS'),
                     string(credentialsId: 'db-conn', variable: 'DB_CONN'),
-                    file(credentialsId: 'docker-compose-file', variable: 'DOCKER_COMPOSE_PATH')
+                    file(credentialsId: 'docker-compose-file', variable: 'DOCKER_COMPOSE_PATH'),
+                    sshUserPrivateKey(credentialsId: 'server-ssh-key', keyFileVariable: 'SSH_KEY')
                 ]) {
-                    sshagent (credentials: ['server-ssh-key']) {
-                        sh '''
-                        # Tạo thư mục project và data trên server nếu chưa tồn tại
-                        ssh -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_HOST "mkdir -p ~/project/data"
+                    sh '''
+                    # Tạo thư mục project và data trên server nếu chưa tồn tại
+                    ssh -i "$SSH_KEY" -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_HOST "mkdir -p ~/project/data"
 
-                        # Copy docker-compose.prod.yml từ Jenkins sang server
-                        scp -o StrictHostKeyChecking=no $DOCKER_COMPOSE_PATH $SERVER_USER@$SERVER_HOST:~/project/docker-compose.yml
+                    # Copy docker-compose.prod.yml từ Jenkins sang server
+                    scp -i "$SSH_KEY" -o StrictHostKeyChecking=no $DOCKER_COMPOSE_PATH $SERVER_USER@$SERVER_HOST:~/project/docker-compose.yml
 
-                        # SSH vào production server để kéo image mới và khởi chạy container
-                        ssh -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_HOST "
-                        cd ~/project && \
-                        echo \\"DOCKER_USER=$DOCKER_USER\\" > .env && \
-                        echo \\"IMAGE_NAME=$IMAGE_NAME\\" >> .env && \
-                        echo \\"DB_CONNECTION_STRING=$DB_CONN\\" >> .env && \
-                        echo \\"$DOCKER_PASS\\" | docker login -u $DOCKER_USER --password-stdin && \
-                        docker compose --env-file .env pull && \
-                        docker compose --env-file .env down && \
-                        docker compose --env-file .env up -d && \
-                        docker image prune -f
-                        "
-                        '''
-                    }
+                    # SSH vào production server để kéo image mới và khởi chạy container
+                    ssh -i "$SSH_KEY" -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_HOST "
+                    cd ~/project && \
+                    echo \\"DOCKER_USER=$DOCKER_USER\\" > .env && \
+                    echo \\"IMAGE_NAME=$IMAGE_NAME\\" >> .env && \
+                    echo \\"DB_CONNECTION_STRING=$DB_CONN\\" >> .env && \
+                    echo \\"$DOCKER_PASS\\" | docker login -u $DOCKER_USER --password-stdin && \
+                    docker compose --env-file .env pull && \
+                    docker compose --env-file .env down && \
+                    docker compose --env-file .env up -d && \
+                    docker image prune -f
+                    "
+                    '''
                 }
             }
         }
