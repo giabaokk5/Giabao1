@@ -2,7 +2,6 @@ pipeline {
     agent any
 
     environment {
-        REGISTRY = "docker.io/${DOCKER_USERNAME}"
         IMAGE_NAME = "htcd-shop"
         SERVER_HOST = "103.20.96.174"
         SERVER_USER = "root"
