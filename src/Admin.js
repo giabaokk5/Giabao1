@@ -2,6 +2,7 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import './assets/style/admin.css';
 import api from './services/api';
+import AdminSidebar from './components/admin/AdminSidebar';
 
 function Admin() {
   const [stats, setStats] = useState({
@@ -165,42 +166,7 @@ function Admin() {
     <>
       <main className="admin-shell">
         {/* Sidebar */}
-        <aside className="admin-sidebar">
-          <div className="admin-brand">
-            <span className="admin-brand-mark">HT</span>
-            <span>
-              <strong>HTCD SHOP</strong>
-              <small>TRUNG TÂM QUẢN TRỊ</small>
-            </span>
-          </div>
-          <nav className="admin-nav">
-            <Link to="/admin" className="admin-nav-link active">
-              <span>⌂</span> Tổng quan
-            </Link>
-            <a
-              href="#revenue-chart"
-              className="admin-nav-link"
-              onClick={(e) => {
-                e.preventDefault();
-                document.getElementById('revenue-chart')?.scrollIntoView({ behavior: 'smooth' });
-              }}
-            >
-              <span>📈</span> Báo cáo doanh thu
-            </a>
-            <Link to="/admin/orders" className="admin-nav-link">
-              <span>◷</span> Đơn hàng
-              {stats.ordersToday > 0 && <span className="admin-nav-badge">{stats.ordersToday}</span>}
-            </Link>
-            <Link to="/admin/products" className="admin-nav-link">
-              <span>▦</span> Sản phẩm
-              <span className="admin-nav-badge secondary">{stats.totalProducts}</span>
-            </Link>
-            <Link to="/admin/users" className="admin-nav-link">
-              <span>♙</span> Người dùng
-            </Link>
-          </nav>
-          <Link to="/" className="admin-back-link">← Về cửa hàng</Link>
-        </aside>
+        <AdminSidebar active="overview" />
 
         {/* Main Content */}
         <section className="admin-content">

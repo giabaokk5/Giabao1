@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 import '../../assets/style/admin.css';
 import api from '../../services/api';
+import AdminSidebar from './AdminSidebar';
 
 function AdminUsers() {
   const [users, setUsers] = useState([]);
@@ -40,19 +40,7 @@ function AdminUsers() {
 
   return (
     <main className="admin-shell">
-      <aside className="admin-sidebar">
-        <div className="admin-brand">
-          <span className="admin-brand-mark">HT</span>
-          <span><strong>HTCD SHOP</strong><small>TRUNG TÂM QUẢN TRỊ</small></span>
-        </div>
-        <nav className="admin-nav">
-          <Link to="/admin" className="admin-nav-link"><span>⌂</span> Tổng quan</Link>
-          <Link to="/admin/products" className="admin-nav-link"><span>▦</span> Sản phẩm</Link>
-          <Link to="/admin/orders" className="admin-nav-link"><span>◷</span> Đơn hàng</Link>
-          <Link to="/admin/users" className="admin-nav-link active"><span>♙</span> Người dùng</Link>
-        </nav>
-        <Link to="/" className="admin-back-link">← Về cửa hàng</Link>
-      </aside>
+      <AdminSidebar active="users" />
 
       <section className="admin-content">
         <header className="admin-page-header">

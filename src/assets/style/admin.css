@@ -87,6 +87,7 @@ aside {
   position: sticky;
   top: 0;
   flex: 0 0 250px;
+  align-self: flex-start;
   z-index: 100;
   overflow-y: auto;
   flex-direction: column;

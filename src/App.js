@@ -26,6 +26,7 @@ import TshirtsPage from './components/TshirtsPage';
 import ProductManagement from './components/admin/ProductManagement';
 import AdminOrders from './components/admin/AdminOrders';
 import AdminUsers from './components/admin/AdminUsers';
+import AdminRevenue from './components/admin/AdminRevenue';
 
 function ProtectedRoute() {
   const { isLoggedIn, isAuthLoading } = useContext(AuthContext);
@@ -77,6 +78,7 @@ function App() {
           <Route element={<ProtectedRoute />}>
             <Route element={<AdminRoute />}>
               <Route path="/admin" element={<Admin />} />
+              <Route path="/admin/revenue" element={<AdminRevenue />} />
               <Route path="/admin/products" element={<ProductManagement />} />
               <Route path="/admin/orders" element={<AdminOrders />} />
               <Route path="/admin/users" element={<AdminUsers />} />
