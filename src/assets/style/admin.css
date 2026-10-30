@@ -83,8 +83,12 @@ aside {
 .admin-sidebar {
   display: flex;
   width: 250px;
-  min-height: 100vh;
+  height: 100vh;
+  position: sticky;
+  top: 0;
   flex: 0 0 250px;
+  z-index: 100;
+  overflow-y: auto;
   flex-direction: column;
   padding: 28px 18px;
   box-sizing: border-box;
@@ -1138,4 +1142,18 @@ aside {
   .chart-header {
     flex-direction: column;
   }
+}
+
+.admin-nav-badge {
+  margin-left: auto;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: #e64a2e;
+  color: #fff;
+  font-size: 0.68rem;
+  font-weight: 800;
+}
+.admin-nav-badge.secondary {
+  background: #333;
+  color: #a8a39d;
 }

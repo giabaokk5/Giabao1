@@ -177,11 +177,23 @@ function Admin() {
             <Link to="/admin" className="admin-nav-link active">
               <span>⌂</span> Tổng quan
             </Link>
+            <a
+              href="#revenue-chart"
+              className="admin-nav-link"
+              onClick={(e) => {
+                e.preventDefault();
+                document.getElementById('revenue-chart')?.scrollIntoView({ behavior: 'smooth' });
+              }}
+            >
+              <span>📈</span> Báo cáo doanh thu
+            </a>
             <Link to="/admin/orders" className="admin-nav-link">
               <span>◷</span> Đơn hàng
+              {stats.ordersToday > 0 && <span className="admin-nav-badge">{stats.ordersToday}</span>}
             </Link>
             <Link to="/admin/products" className="admin-nav-link">
               <span>▦</span> Sản phẩm
+              <span className="admin-nav-badge secondary">{stats.totalProducts}</span>
             </Link>
             <Link to="/admin/users" className="admin-nav-link">
               <span>♙</span> Người dùng
@@ -257,7 +269,7 @@ function Admin() {
           </div>
 
           {/* KHỐI BIỂU ĐỒ BÁN HÀNG & DOANH THU - LỢI NHUẬN */}
-          <div className="admin-chart-section">
+          <div id="revenue-chart" className="admin-chart-section">
             <div className="chart-card">
               <div className="chart-header">
                 <div>
