@@ -2,9 +2,11 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = "htcd-shop"
-        SERVER_HOST = "127.0.0.1"
-        SERVER_USER = "root"
+        IMAGE_NAME     = "htcd-shop"
+        SERVER_HOST    = "127.0.0.1"
+        SERVER_USER    = "root"
+        APP_PORT       = "5000"
+        PUBLIC_HOST    = "103.20.96.174"
     }
 
     stages {
@@ -24,8 +26,8 @@ pipeline {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'dockerhub-cred',
                     usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                    
-                    sh "docker build -t docker.io/$DOCKER_USER/$IMAGE_NAME:latest ."
+
+                    sh "docker build -t docker.io/\$DOCKER_USER/\$IMAGE_NAME:latest ."
                 }
             }
         }
@@ -34,7 +36,7 @@ pipeline {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'dockerhub-cred',
                     usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                    
+
                     sh 'echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin'
                     sh 'docker push docker.io/$DOCKER_USER/$IMAGE_NAME:latest'
                 }
@@ -51,25 +53,47 @@ pipeline {
                     sshUserPrivateKey(credentialsId: 'server-ssh-key', keyFileVariable: 'SSH_KEY')
                 ]) {
                     sh '''
-                    # Tạo thư mục project và data trên server nếu chưa tồn tại
                     ssh -i "$SSH_KEY" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $SERVER_USER@$SERVER_HOST "mkdir -p ~/project/data"
 
-                    # Copy docker-compose.prod.yml từ Jenkins sang server
                     scp -i "$SSH_KEY" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $DOCKER_COMPOSE_PATH $SERVER_USER@$SERVER_HOST:~/project/docker-compose.yml
 
-                    # SSH vào production server để kéo image mới và khởi chạy container
-                    ssh -i "$SSH_KEY" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $SERVER_USER@$SERVER_HOST "
-                    cd ~/project && \
-                    echo \\"DOCKER_USER=$DOCKER_USER\\" > .env && \
-                    echo \\"IMAGE_NAME=$IMAGE_NAME\\" >> .env && \
-                    echo \\"DB_CONNECTION_STRING=$DB_CONN\\" >> .env && \
-                    echo \\"$DOCKER_PASS\\" | docker login -u $DOCKER_USER --password-stdin && \
+                    ssh -i "$SSH_KEY" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $SERVER_USER@$SERVER_HOST \
+                    "cd ~/project && \
+                    echo \"DOCKER_USER=$DOCKER_USER\" > .env && \
+                    echo \"IMAGE_NAME=$IMAGE_NAME\" >> .env && \
+                    echo \"DB_CONNECTION_STRING=$DB_CONN\" >> .env && \
+                    echo \"$DOCKER_PASS\" | docker login -u $DOCKER_USER --password-stdin && \
                     docker compose --env-file .env pull && \
                     (docker compose --env-file .env down || true) && \
                     docker compose --env-file .env up -d && \
-                    docker image prune -f
-                    "
+                    docker image prune -f"
                     '''
+                }
+            }
+        }
+
+        stage('Deploy Info') {
+            steps {
+                script {
+                    def webUrl   = "http://${env.PUBLIC_HOST}:${env.APP_PORT}"
+                    def apiUrl   = "http://${env.PUBLIC_HOST}:${env.APP_PORT}/api/health"
+                    def imageUrl = "https://hub.docker.com/r/baone2k5/${env.IMAGE_NAME}"
+
+                    echo """
+╔═══════════════════════════════════════════════════════════╗
+║         🚀 HTCD SHOP — DEPLOY THÀNH CÔNG!                ║
+╠═══════════════════════════════════════════════════════════╣
+║                                                           ║
+║  🌐 Web App    : ${webUrl}              ║
+║  🔗 API Health : ${apiUrl}  ║
+║  🐳 Docker Hub : ${imageUrl}    ║
+║  🖥️  Server    : ${env.PUBLIC_HOST}                      ║
+║  📦 Port       : ${env.APP_PORT}                         ║
+║                                                           ║
+╚═══════════════════════════════════════════════════════════╝
+"""
+                    // Gắn link clickable vào Jenkins build history sidebar
+                    currentBuild.description = "🌐 <a href='${webUrl}' target='_blank'>${webUrl}</a>"
                 }
             }
         }
@@ -77,7 +101,7 @@ pipeline {
 
     post {
         success {
-            echo "✅ Triển khai CI/CD HTCD Shop thành công lên production!"
+            echo "✅ Triển khai CI/CD HTCD Shop thành công lên production! 🌐 http://${PUBLIC_HOST}:${APP_PORT}"
         }
         failure {
             echo "❌ Pipeline CI/CD thất bại! Vui lòng kiểm tra console log."
