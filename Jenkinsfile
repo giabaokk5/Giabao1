@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         IMAGE_NAME = "htcd-shop"
-        SERVER_HOST = "103.20.96.174"
+        SERVER_HOST = "127.0.0.1"
         SERVER_USER = "root"
     }
 
@@ -52,20 +52,20 @@ pipeline {
                 ]) {
                     sh '''
                     # Tạo thư mục project và data trên server nếu chưa tồn tại
-                    ssh -i "$SSH_KEY" -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_HOST "mkdir -p ~/project/data"
+                    ssh -i "$SSH_KEY" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $SERVER_USER@$SERVER_HOST "mkdir -p ~/project/data"
 
                     # Copy docker-compose.prod.yml từ Jenkins sang server
-                    scp -i "$SSH_KEY" -o StrictHostKeyChecking=no $DOCKER_COMPOSE_PATH $SERVER_USER@$SERVER_HOST:~/project/docker-compose.yml
+                    scp -i "$SSH_KEY" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $DOCKER_COMPOSE_PATH $SERVER_USER@$SERVER_HOST:~/project/docker-compose.yml
 
                     # SSH vào production server để kéo image mới và khởi chạy container
-                    ssh -i "$SSH_KEY" -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_HOST "
+                    ssh -i "$SSH_KEY" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $SERVER_USER@$SERVER_HOST "
                     cd ~/project && \
                     echo \\"DOCKER_USER=$DOCKER_USER\\" > .env && \
                     echo \\"IMAGE_NAME=$IMAGE_NAME\\" >> .env && \
                     echo \\"DB_CONNECTION_STRING=$DB_CONN\\" >> .env && \
                     echo \\"$DOCKER_PASS\\" | docker login -u $DOCKER_USER --password-stdin && \
                     docker compose --env-file .env pull && \
-                    docker compose --env-file .env down && \
+                    (docker compose --env-file .env down || true) && \
                     docker compose --env-file .env up -d && \
                     docker image prune -f
                     "
