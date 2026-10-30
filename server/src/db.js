@@ -2,7 +2,16 @@ const fs = require('fs');
 const path = require('path');
 const bcrypt = require('bcryptjs');
 const config = require('./config');
-const initialProducts = require('../data/initialProducts');
+let initialProducts = [];
+try {
+  initialProducts = require('./initialProducts');
+} catch (e) {
+  try {
+    initialProducts = require('../data/initialProducts');
+  } catch (err) {
+    initialProducts = [];
+  }
+}
 
 class Database {
   constructor() {
