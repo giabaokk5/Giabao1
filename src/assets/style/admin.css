@@ -1167,3 +1167,249 @@ aside {
   background: #333;
   color: #a8a39d;
 }
+
+/* =========================================================
+   HTCD ENTERPRISE ADMIN DESIGN SYSTEM - ENHANCED 2026
+   ========================================================= */
+
+/* Sidebar Enhancements */
+.admin-brand-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.brand-tag {
+  display: inline-block;
+  font-size: 0.52rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: #e64a2e;
+  background: rgba(230, 74, 46, 0.12);
+  padding: 2px 6px;
+  border-radius: 3px;
+  width: fit-content;
+}
+
+.admin-nav-section-label {
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: #6b7280;
+  margin: 22px 0 8px 12px;
+  text-transform: uppercase;
+}
+
+.nav-icon {
+  width: 18px;
+  text-align: center;
+  font-size: 0.95rem;
+  color: #9ca3af;
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.admin-nav-link:hover .nav-icon,
+.admin-nav-link.active .nav-icon {
+  color: #e64a2e;
+  transform: scale(1.08);
+}
+
+.nav-hot-badge {
+  margin-left: auto;
+  font-size: 0.62rem;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: #e64a2e;
+  color: #fff;
+  text-transform: uppercase;
+}
+
+.admin-user-profile {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  background: #22201e;
+  border: 1px solid rgba(255,255,255,0.06);
+  margin-bottom: 14px;
+}
+
+.admin-avatar {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #2d2a27;
+  display: grid;
+  place-items: center;
+  color: #d1d5db;
+  font-size: 0.9rem;
+}
+
+.avatar-status-dot {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #10b981;
+  border: 2px solid #22201e;
+}
+
+.admin-user-meta {
+  display: flex;
+  flex-direction: column;
+}
+
+.user-name {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #f3f4f6;
+}
+
+.user-role {
+  font-size: 0.68rem;
+  color: #9ca3af;
+}
+
+/* Header Buttons */
+.admin-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.btn-header-report {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 6px;
+  background: #e64a2e;
+  color: #fff !important;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-decoration: none;
+  box-shadow: 0 4px 12px rgba(230, 74, 46, 0.25);
+  transition: all 0.2s ease;
+}
+
+.btn-header-report:hover {
+  background: #cf3d23;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(230, 74, 46, 0.35);
+}
+
+.status-live-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #10b981;
+  margin-right: 6px;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+}
+
+/* KPI Circle Icons */
+.kpi-icon-circle {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  font-size: 1.15rem;
+}
+
+.revenue-circle {
+  background: #fef2f2;
+  color: #ef4444;
+}
+
+.profit-circle {
+  background: #ecfdf5;
+  color: #10b981;
+}
+
+.orders-circle {
+  background: #eff6ff;
+  color: #3b82f6;
+}
+
+.customers-circle {
+  background: #f5f3ff;
+  color: #8b5cf6;
+}
+
+.admin-stat-card {
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s ease;
+}
+
+.admin-stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.07);
+}
+
+.text-highlight {
+  color: #e64a2e;
+}
+
+/* Module Quick Actions */
+.module-icon-wrap {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  font-size: 1.2rem;
+  margin-bottom: 12px;
+  transition: transform 0.2s ease;
+}
+
+.module-products .module-icon-wrap {
+  background: #fff7ed;
+  color: #f97316;
+}
+
+.module-orders .module-icon-wrap {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.module-users .module-icon-wrap {
+  background: #f5f3ff;
+  color: #7c3aed;
+}
+
+.admin-module-card:hover .module-icon-wrap {
+  transform: scale(1.08);
+}
+
+.admin-module-card:hover .admin-module-arrow {
+  transform: translateX(4px);
+}
+
+.admin-module-arrow {
+  transition: transform 0.2s ease;
+}
+
+/* Note Alert */
+.admin-note {
+  border-radius: 8px;
+  border-left: 4px solid #f59e0b;
+  background: #fffbeb;
+  border: 1px solid #fef3c7;
+  border-left: 4px solid #f59e0b;
+}
+
+.admin-note-icon {
+  font-size: 1.3rem;
+  color: #d97706;
+}
+
+.tooltip-profit {
+  color: #34d399;
+}
