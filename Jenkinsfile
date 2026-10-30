@@ -5,7 +5,7 @@ pipeline {
         IMAGE_NAME     = "htcd-shop"
         SERVER_HOST    = "127.0.0.1"
         SERVER_USER    = "root"
-        APP_PORT       = "5000"
+        APP_PORT       = "3007"
         PUBLIC_HOST    = "103.20.96.174"
     }
 
@@ -56,10 +56,11 @@ pipeline {
                     # 1. Tạo thư mục project và data trên server nếu chưa tồn tại
                     ssh -i "$SSH_KEY" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $SERVER_USER@$SERVER_HOST "mkdir -p ~/project/data"
 
-                    # 2. Tạo file .env cục bộ an toàn (tránh lỗi ký tự ; trong chuỗi connection string qua SSH)
+                    # 2. Tạo file .env cục bộ an toàn và truyền cả APP_PORT
                     cat <<EOF > remote.env
 DOCKER_USER=${DOCKER_USER}
 IMAGE_NAME=${IMAGE_NAME}
+APP_PORT=${APP_PORT}
 DB_CONNECTION_STRING=${DB_CONN}
 EOF
 
