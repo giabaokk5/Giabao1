@@ -53,15 +53,24 @@ pipeline {
                     sshUserPrivateKey(credentialsId: 'server-ssh-key', keyFileVariable: 'SSH_KEY')
                 ]) {
                     sh '''
+                    # 1. Tạo thư mục project và data trên server nếu chưa tồn tại
                     ssh -i "$SSH_KEY" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $SERVER_USER@$SERVER_HOST "mkdir -p ~/project/data"
 
-                    scp -i "$SSH_KEY" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $DOCKER_COMPOSE_PATH $SERVER_USER@$SERVER_HOST:~/project/docker-compose.yml
+                    # 2. Tạo file .env cục bộ an toàn (tránh lỗi ký tự ; trong chuỗi connection string qua SSH)
+                    cat <<EOF > remote.env
+DOCKER_USER=${DOCKER_USER}
+IMAGE_NAME=${IMAGE_NAME}
+DB_CONNECTION_STRING=${DB_CONN}
+EOF
 
+                    # 3. Copy docker-compose.yml và .env lên server
+                    scp -i "$SSH_KEY" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $DOCKER_COMPOSE_PATH $SERVER_USER@$SERVER_HOST:~/project/docker-compose.yml
+                    scp -i "$SSH_KEY" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null remote.env $SERVER_USER@$SERVER_HOST:~/project/.env
+                    rm -f remote.env
+
+                    # 4. Kéo image và khởi chạy container
                     ssh -i "$SSH_KEY" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $SERVER_USER@$SERVER_HOST \
                     "cd ~/project && \
-                    echo \"DOCKER_USER=$DOCKER_USER\" > .env && \
-                    echo \"IMAGE_NAME=$IMAGE_NAME\" >> .env && \
-                    echo \"DB_CONNECTION_STRING=$DB_CONN\" >> .env && \
                     echo \"$DOCKER_PASS\" | docker login -u $DOCKER_USER --password-stdin && \
                     docker compose --env-file .env pull && \
                     (docker compose --env-file .env down || true) && \
