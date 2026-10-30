@@ -76,25 +76,34 @@ aside {
 .admin-shell {
   display: flex;
   min-height: 100vh;
-  background: #f6f4f0;
+  background-color: #f6f4f0;
+  background-image: linear-gradient(to right, #171717 250px, #f6f4f0 250px);
   color: #171717;
+  align-items: stretch;
 }
 
 .admin-sidebar {
-  display: flex;
   width: 250px;
-  height: 100vh;
+  min-width: 250px;
+  flex: 0 0 250px;
+  background: #171717;
+  color: #fff;
+  align-self: stretch;
+  min-height: 100%;
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+.admin-sidebar-sticky {
   position: sticky;
   top: 0;
-  flex: 0 0 250px;
-  align-self: flex-start;
-  z-index: 100;
-  overflow-y: auto;
+  height: 100vh;
+  display: flex;
   flex-direction: column;
   padding: 28px 18px;
   box-sizing: border-box;
-  background: #171717;
-  color: #fff;
+  overflow-y: auto;
 }
 
 .admin-brand {
